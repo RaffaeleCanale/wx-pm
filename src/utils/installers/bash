@@ -6,6 +6,15 @@ function install() {
 
     buildProperties "$dist"
     compile "$src" "$dist" "$properties"
+
+    postInstall
+}
+
+function postInstall() {
+    local cmd=`getConfig postInstall null`
+    if [ "$cmd" != "null" ]; then
+        eval "$cmd"
+    fi
 }
 
 function safeProp() {
