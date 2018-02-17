@@ -1,0 +1,14 @@
+
+########## PATHS ##########
+
+export SCRIPTS_ROOT="__ROOT__"
+export PATH="$PATH:__PATH__"
+
+
+########## BASH COMPLETION ##########
+
+#if [ -d "${SCRIPTS}/completion" ]; then
+#    for comp in "${SCRIPTS}/completion/"*; do
+#        . "$comp"
+#    done
+#fi

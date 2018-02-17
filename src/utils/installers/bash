@@ -1,0 +1,51 @@
+function install() {
+    local src=`getConfigPath source src`
+    local dist=`getConfigPath dist dist`
+
+    test -d "$src" || error "Source not found"
+
+    buildProperties "$dist"
+    compile "$src" "$dist" "$properties"
+}
+
+function safeProp() {
+    echo "__$1__"
+}
+
+function defaultProperties() {
+    echo "`safeProp "ROOT"` = $1"
+    echo "`safeProp "STARTER"` = $SCRIPTS_ROOT/utils/starter/scriptStarter"
+}
+
+function buildProperties() {
+    local content=`defaultProperties "$1"`
+    files=(`cat "$CONFIG" | jq -r '.files[].output'`)
+
+    for file in files; do
+        if [[ "$file" == *.properties ]]; then
+            contentCat=`cat "$file"`
+            content=`${content}${contentCat}`
+        fi
+    done
+
+    createTmpFile properties
+    echo "$content" > "$properties"
+}
+
+function compile() {
+    local src="$1"
+    local dst="$2"
+    local properties="$3"
+
+    safeMkdir "$dst"
+
+    for file in "$src/"*; do
+        local fileC="$dst/$(basename "$file")"
+        if [ -d "$file" ]; then
+            compile "$file" "$fileC" "$properties"
+        else
+            verboseR "$file"
+            "__ROOT__/utils/compiler" "$file" "$fileC" "$properties"
+        fi
+    done
+}

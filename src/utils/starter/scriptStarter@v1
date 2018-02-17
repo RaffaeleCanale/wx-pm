@@ -1,0 +1,568 @@
+#!/bin/bash
+# This offers common useful methods plus common arguments management (like help)
+#
+# Functions:
+#   - declareConstants
+#   - printHelp
+#   - run
+#
+# Needed:
+#   ¬ awk
+#
+
+
+function sedeasy {
+  sed "s/$(echo $1 | sed -e 's/\([[\/.*]\|\]\)/\\&/g')/$(echo $2 | sed -e 's/[\/&]/\\&/g')/g"
+}
+
+#
+# Prints a file size in human readable form.
+#
+# Parameters:
+#   1: File size
+#
+function printSize() {
+    awk -v sum="$1" ' BEGIN {hum[1024^3]="Gb"; hum[1024^2]="Mb"; hum[1024]="Kb"; for (x=1024^3; x>=1024; x/=1024) { if (sum>=x) { printf "%.2f %s\n",sum/x,hum[x]; break; } } if (sum<1024) print "1kb"; } '
+}
+
+#
+# Returns true if the array contains the given value
+#
+# Parameters:
+#   1: Value to test
+#   2-@: Array
+function arrayContains() {
+	local target="$1"
+	shift
+
+	for value in "$@"; do
+		if [ "$value" == "$target" ]; then
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+#
+# Prints only if the verbose option is set.
+# Parameters:
+#   @: Message
+#
+function verbose() {
+    if $verbose; then
+        local color_code=$((30+(${#PROGNAME} % 6)))
+        echoColor "[$PROGNAME] " "$color_code" "grey" -n
+        echo "$@"
+    fi
+}
+
+#
+# Prints only if the verbose option is set.
+# Parameters:
+#   @: Message
+#
+function verboseR() {
+    if $verbose; then
+        local color_code=$((30+(${#PROGNAME} % 6)))
+        printf '\r%s\033[01;%sm%s\033[0m %s' "$(tput el)" "$color_code" "[$PROGNAME]" "$@"
+        # echoColor "\r[$PROGNAME] " "$color_code" "grey" -n
+        # echo -ne "$@"
+    fi
+}
+
+function safeMkdir() {
+    test -d "$1" || mkdir "$1" || error "Cannot create directory $1"
+}
+
+#
+# Tests if the first string is contained in the second while ignoring case
+#
+#   1: Query string
+#   2: Target string
+#
+function softMatch() {
+    [[ "${2,,}" == *"${1,,}"* ]]
+}
+
+#
+# Prints a colored message.
+#
+# Parameters:
+#   1: Message
+#   2: Color code
+#   3: Color name
+#   4: [/-n] to omit the trailing line
+#
+function echoColor() {
+   if [ $# -gt 3 ] && [ "$4" == "-n" ]; then
+       echo -ne "\033[01;${2}m${1}\033[0m"
+   else
+       echo -e "\033[01;${2}m${1}\033[0m"
+   fi
+}
+
+function echoRed() {
+	echoColor "$1" 31 "red" "${2:-}"
+}
+
+function echoGreen() {
+	echoColor "$1" 32 "green" "${2:-}"
+}
+
+function echoYellow() {
+	echoColor "$1" 33 "yellow" "${2:-}"
+}
+
+function echoBlue() {
+	echoColor "$1" 34 "blue" "${2:-}"
+}
+
+function echoViolet() {
+	echoColor "$1" 35 "violet" "${2:-}"
+}
+
+function echoGrey() {
+    echoColor "$1" 30 "grey" "${2:-}"
+}
+
+function changeIFS() {
+    SAVEIFS=$IFS
+
+    if [ $# -gt 0 ]; then
+        IFS="$1"
+    else
+        IFS=$(echo -en "\n\b")
+    fi
+}
+
+function resetIFS() {
+    IFS=$SAVEIFS
+}
+
+
+# Create a temporary directory (that will automatically be deleted)
+#   Parameters:
+#       1: Output variable
+function createTmpDir() {
+    local _tmp="$(mktemp -d)"
+    addOnExit "rm -r \"$_tmp\""
+
+    eval "$1=\"$_tmp\""
+}
+
+# Get the filename and extension of a given file
+#   Parameters:
+#       1: Output variables for the filename and extension separated by comma
+#       2: Output variable for the extension
+#
+# Example use: getFileNameAndExtension filename,ext "$file"
+function getFileNameAndExtension() {
+    local _filename=$(basename "$2")
+    local _extension=".${_filename##*.}"
+    if [ "$_extension" == ".$_filename" ]; then
+        _extension=""
+    fi
+    _filename="${_filename%.*}"
+
+    IFS="," read -ra vars <<< "$1"
+    eval "${vars[0]}=\"$_filename\""
+    eval "${vars[1]}=\"$_extension\""
+}
+
+# Create a temporary directory (that will automatically be deleted)
+#   Parameters:
+#       1: Output variable
+#       2: (optional) File name
+function createTmpFile() {
+    local _tmp
+    if [ $# -gt 1 ]; then
+        getFileNameAndExtension filename,extension "$2"
+
+        _tmp=$(mktemp $filename.XXX$extension)
+    else
+        _tmp=$(mktemp)
+    fi
+
+    addOnExit "rm \"$_tmp\""
+
+    eval "$1=\"$_tmp\""
+}
+
+#
+# Parameters:
+#   1: Output variable
+#   2: File path
+#
+function getFreshFile() {
+    getFileNameAndExtension filename,extension "$2"
+
+    local _result="$(dirname "$2")/${filename}${extension}"
+    local _i=1
+    while [ -f "$_result" ]; do
+        _i=$((_i+1))
+        _result="$(dirname "$2")/${filename}_$_i$extension"
+    done
+
+    eval "$1=\"$_result\""
+}
+
+#
+# Prints an error message and exits.
+#
+# Parameters:
+#   1: Message
+#   2: Code
+#
+function error() {
+    local code=" ($?)"
+    if [ $# -gt 1 ]; then
+        code="$2"
+    fi
+
+    echoRed "${PROGNAME}${code}: ${1:-"Unknown Error"}" 1>&2
+    exit 1
+}
+
+#
+# Checks if there are more arguments and launches an error if not
+# Typical usage: hasMoreArgs $#
+#
+# Parameters:
+#   1: Remaining arguments count ($#)
+#   2: (optional) Expected arguments count
+#   3: (optional) Error message
+#
+function hasMoreArgs() {
+    local expected="${2:-1}"
+    local message="${3:-"Missing argument(s)"}"
+
+    test "$1" -ge "$expected" || error "$message"
+}
+
+
+# 1: Output variable
+# 2: Message
+function inputPassword() {
+    local message="${2:-Input password: }"
+
+    read -s -p "${message}" $1
+    echo
+}
+
+# 1: Input variable
+# 2: Message
+# 3: Allow empty (default true)
+function input() {
+    local tmp_
+
+    read -e -p "$2" $1
+        # tmp_="$$1"
+    eval "tmp_=\"\$$1\""
+
+    if [ $# -gt 2 ] && ! $3 && [ -z "$tmp_" ]; then
+        echoYellow "Input cannot be empty"
+        input "$@"
+    fi
+}
+
+# 1: Message
+# Return: 0 if replied YES, 1 else
+function inputYesNo() {
+    read -p "$1 (y/n): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        return 0
+    elif [[ $REPLY =~ ^[Nn]$ ]]; then
+        return 1
+    else
+        inputYesNo "$@"
+    fi
+
+}
+
+# 1: Input variable
+# 2: Message
+function inputChar() {
+    read -p "$2" -n 1 -r
+    echo
+    eval "$1=\"$REPLY\""
+}
+
+# 1: Input variable
+# 2: Message
+# 3: Min
+# 4: Max
+function inputNumber() {
+    read -e -p "$2 [${3:--}, ${4:--}]: " $1
+
+    eval "local tmp_=\"\$$1\""
+
+    if ! [[ "$tmp_" =~ ^-?[0-9]+$ ]]; then
+        echoYellow "Must be a number"
+        inputNumber "$@"
+        return
+    fi
+
+    if ! testNumber "$tmp_" "${3:-}" "${4:-}"; then
+        echoYellow "Must respect bounds"
+        inputNumber "$@"
+        return
+    fi
+}
+
+#   1: Number
+#   2: Min (optional)
+#   3: Max (optional)
+function testNumber() {
+    ([ -z "${2:-}" ] || [ $1 -ge $2 ]) && ([ -z "${3:-}" ] || [ $1 -le $3 ])
+}
+
+
+# private
+function onExit() {
+    for i in "${onExitItems[@]}"
+    do
+        eval $i
+    done
+}
+
+# Add a commnand to execute on exit
+# @: Command to execute
+function addOnExit() {
+    local n=${#onExitItems[@]}
+    onExitItems[$n]="$*"
+    if [[ $n -eq 0 ]]; then
+        trap onExit EXIT
+    fi
+}
+
+#
+# Load an option from input.
+# Examples:
+#	getOpt "-n" count 1 24
+#	getOpt "-f" force
+#	getOpt "-p" params 3 p1 p2 p3
+#   getOpt "-.." count OPT "1"
+#
+# Parameters:
+#   1: Expression to match
+#   2: Variable to store result
+#   3: Count   (Set to 'OPT' in order to return the exact argument used)
+#   @: Default value(s)
+#
+function getOpt() {
+    local tmpArgs=()
+    local i=0
+    local optionSet=false
+    local ro=""
+
+    if $READONLY; then
+        ro="readonly "
+    fi
+
+    while [ $i -lt "${#ARGUMENTS[@]}" ]; do
+        if ! $optionSet && [[ "${ARGUMENTS[$i]}" =~ ^$1$ ]]; then
+            # echo MATCH FOR ${ARGUMENTS[$i]} AND $1
+            if [ $# -lt 3 ] || [ "$3" == "0" ]; then
+                eval "${ro}$2=true"
+            elif [ "$3" == "OPT" ]; then
+                eval "${ro}$2=${ARGUMENTS[$i]}"
+
+            elif [ "$3" == "1" ]; then
+                i=$((i+1))
+
+                hasMoreArgs "${#ARGUMENTS[@]}" "$((i-1))" "Missing arguments for $1"
+
+                eval "${ro}$2=${ARGUMENTS[$i]}"
+
+            elif [ "$3" == "-1" ]; then
+                eval "$2=()"
+
+                i=$((i+1))
+                while [ $i -lt "${#ARGUMENTS[@]}" ]; do
+                    eval "$2+=(${ARGUMENTS[$i]})"
+                    i=$((i+1))
+                done
+
+            else
+                local j="$3"
+                eval "$2=()"
+
+                while [ $j -gt 0 ]; do
+                    i=$((i+1))
+
+                    hasMoreArgs "${#ARGUMENTS[@]}" "$((i-1))" "Missing arguments for $1"
+                    eval "$2+=(${ARGUMENTS[$i]})"
+
+                    j=$((j-1))
+                done
+            fi
+            optionSet=true
+
+        else
+            tmpArgs+=("${ARGUMENTS[$i]}")
+        fi
+
+        i=$((i+1))
+    done
+
+    if $optionSet; then
+        ARGUMENTS=("${tmpArgs[@]:+${tmpArgs[@]}}")
+        return 0
+
+    elif [ $# -lt 3 ] || [ "$3" == "0" ]; then # Is a boolean opt
+        eval "${ro}$2=false"
+
+    elif [ "$3" == "OPT" ]; then # OPT case
+        if [ $# -gt 3 ]; then
+            eval "${ro}$2=$4"
+        else
+            eval "${ro}$2=\"\""
+        fi
+
+    elif [ $# -gt 3 ]; then # Apply default value
+        if [ $3 -eq 1 ]; then
+            eval "${ro}$2=$4"
+        else
+            # local tmp=("${@:4}")
+            eval "$2=(\"${@:4}\")"
+            # eval "$2=()"
+        fi
+    elif [ $# -eq 3 ]; then # There are no default values
+        if [ $3 -eq 1 ]; then
+            eval "${ro}$2=\"\""
+        else
+            eval "$2=()"
+        fi
+
+    fi
+
+    return 1
+}
+
+#
+# Get mandatory arguments
+#
+# Example use: getArg file,output "$@"
+#
+function getArg() {
+    local vars
+    local varsCount
+    local targetArgs
+    local updateARGUMENTS=false
+    local ro=""
+
+    if $READONLY; then
+        ro="readonly "
+    fi
+
+    IFS="," read -ra vars <<< "$1"
+    varsCount=${#vars[@]}
+
+    if [ $# -gt 1 ]; then
+        shift
+        targetArgs=("$@")
+    elif [ ${#ARGUMENTS[@]} -eq 0 ]; then
+        targetArgs=()
+    else
+        targetArgs=("${ARGUMENTS[@]}")
+        updateARGUMENTS=true
+    fi
+
+    hasMoreArgs ${#targetArgs[@]} $varsCount
+    for (( i = 0; i < $varsCount; i++ )); do
+        eval "${ro}${vars[$i]}=\"${targetArgs[$i]}\""
+    done
+
+    if $updateARGUMENTS; then
+        ARGUMENTS=("${ARGUMENTS[@]:$varsCount}")
+    fi
+}
+
+
+# private
+function _processArgs() {
+    local arg
+    for arg in "$@"; do
+
+        if [[ "$arg" =~ ^-(h|-help)$ ]] && [ $# -eq 1 ]; then
+            printHelp && cat << EOF
+
+    More options:
+        --help|-h   :   Display this help
+        --verbose|-v:   Print more information on the process
+
+    Environment variables:
+        `FIRST=true declareConstants printConstant`
+
+EOF
+            exit 0
+
+        elif [[ "$arg" =~ ^-(v|-verbose) ]]; then
+            verbose=true
+
+        else
+            ARGUMENTS+=("$arg")
+        fi
+    done
+}
+
+
+function checkUnused() {
+    local unused=""
+    getOpt "-.*" unused OPT
+    if [ -n "$unused" ]; then
+        if [ $unusedBehaviour == "EXIT" ]; then
+            error "Unrecognised option: '$unused'"
+        fi
+        echoYellow "[WARNING] Unrecognised option: '$unused'"
+
+        checkUnused
+    fi
+}
+
+function setConstant() {
+    local ro=""
+
+    if $READONLY; then
+        ro="readonly "
+    fi
+
+    eval "test -z \${$1+x}"
+    if [ $? -eq 0 ]; then
+        eval "${ro}$1=\"$2\""
+    else
+        eval "${ro}$1=\"\$$1\""
+    fi
+}
+
+function printConstant() {
+    if $FIRST; then
+        echo -n "$1"
+        FIRST=false
+    else
+        echo -n ", $1"
+    fi
+}
+
+set -o nounset
+
+PROGNAME=$(basename $0)
+READONLY=true
+onExitItems=()
+verbose=false
+unusedBehaviour="EXIT"
+
+declareConstants setConstant
+ARGUMENTS=()
+
+_processArgs "$@"
+
+loadOptions
+
+if [ $unusedBehaviour != "IGNORE" ]; then
+    checkUnused
+fi
+
+run "${ARGUMENTS[@]:+${ARGUMENTS[@]}}"

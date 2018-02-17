@@ -1,0 +1,64 @@
+#!/bin/bash
+
+function printHelp() {
+    cat << EOF
+
+    Replaces all of the keys found in the input with the corresponding value found in the
+    properties file.
+
+    `echoGreen Usage:` ${PROGNAME} `echoBlue [properties]` `echoViolet "-r"`
+
+        `echoBlue properties`: The properties file should contain list of key-value pairs
+
+        `echoViolet "-r"`: Reverse the keys and values
+
+    Example usage: cat template.txt | applyProperties replacements.properties > compiled.txt
+EOF
+}
+
+function declareConstants() {
+	return 0
+}
+
+function loadOptions() {
+	# unusedBehaviour="IGNORE"
+	getOpt -r reverse
+    # getOpt "--key-pre-proc" keyPreProc 1 "''"
+	return 0
+}
+
+function run () {
+	hasMoreArgs $#
+
+	eval $(buildSed "$1")
+}
+
+function trim() {
+	sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+}
+
+function escape() {
+	sed 's/[^-A-Za-z0-9_]/\\&/g'
+}
+
+function buildSed() {
+	sedsLine=""
+
+	while read -r line; do
+		if [ -n "$line" ]; then
+	        local key=$(echo "$line" | cut -d '=' -f 1 | trim | escape)
+	        local value=$(echo "$line" | cut -d '=' -f 2- | trim | escape)
+
+	        test -z "$sedsLine" || sedsLine="$sedsLine | "
+	        if $reverse; then
+	        	sedsLine="${sedsLine}sed -r s/'$value'/'$key'/g"
+	        else
+	        	sedsLine="${sedsLine}sed -r s/'$key'/'$value'/g"
+	        fi
+	    fi
+    done < "$1"
+
+    echo "$sedsLine"
+}
+
+source "__STARTER__@v1"

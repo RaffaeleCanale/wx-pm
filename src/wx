@@ -1,0 +1,70 @@
+#!/bin/bash
+
+function declareConstants() {
+    $1 PROJECTS_DIR "__PROJECTS_DIR__"
+    $1 WX_PATH "__PATH__"
+    $1 CONFIG ".wxrc"
+}
+
+function getConfig() {
+    test -f "$CONFIG" || error "$CONFIG not found"
+    local result=`cat "$CONFIG" | jq -r ".$1"`
+    if [ "$result" == "null" ]; then
+        echo "$2"
+    else
+        echo "$result"
+    fi
+}
+
+function getConfigPath() {
+    local path=`getConfig "$1" "$2"`
+    echo "$PWD/$path"
+}
+
+function printHelp() {
+    cat << EOF
+
+    TODO
+EOF
+
+    for module in "__ROOT__/modules/"*; do
+        local moduleName=$(basename "$module")
+
+        echo
+        echo
+        echo -n "      ${PROGNAME} "
+        echoGreen "$moduleName "
+
+        source "$module"
+        module_print_help
+    done
+}
+
+function loadOptions() {
+    unusedBehaviour="IGNORE"
+    return 0
+}
+
+function run () {
+    hasMoreArgs $#
+
+    local module="__ROOT__/modules/$1"
+
+    if [ ! -f "$module" ]; then
+        error "Unknown mode: $1"
+    fi
+
+
+    source "$module"
+    shift
+    ARGUMENTS=("$@")
+    module_load_options
+
+    if [ $unusedBehaviour != "IGNORE" ]; then
+        checkUnused
+    fi
+
+    module_run "${ARGUMENTS[@]:+${ARGUMENTS[@]}}"
+}
+
+source "__STARTER__@v1"

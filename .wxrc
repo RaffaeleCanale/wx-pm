@@ -1,0 +1,9 @@
+{
+    "main": "wx",
+    "files": [
+        {
+            "name": "wx-pm"
+            "output": "config.properties"
+        }
+    ]
+}

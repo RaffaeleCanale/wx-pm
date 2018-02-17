@@ -1,0 +1,17 @@
+#!/bin/bash
+function module_print_help() {
+	cat << EOF
+	Install a project with a $CONFIG file present
+
+EOF
+}
+
+function module_load_options() {
+    return 0
+}
+
+function module_run() {
+	source "__ROOT__/utils/installers/bash"
+	install
+	wx add-to-path
+}
