@@ -2,7 +2,7 @@
     "main": "wx",
     "files": [
         {
-            "name": "wx-pm"
+            "name": "wx-pm",
             "output": "config.properties"
         }
     ]

@@ -34,7 +34,7 @@ function defaultProperties() {
 
 function buildProperties() {
     createTmpFile properties
-    defaultProperties "$1" > "$properties   "
+    defaultProperties "$1" > "$properties"
 }
 
 function compile() {

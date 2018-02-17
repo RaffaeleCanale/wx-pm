@@ -21,15 +21,15 @@ function buildProperties() {
     local content=`defaultProperties "$1"`
     files=(`cat "$CONFIG" | jq -r '.files[].output'`)
 
-    for file in files; do
+    for file in "$files"; do
         if [[ "$file" == *.properties ]]; then
             contentCat=`cat "$file"`
-            content=`${content}${contentCat}`
+            content="${content}\n${contentCat}"
         fi
     done
 
     createTmpFile properties
-    echo "$content" > "$properties"
+    echo -e "$content" > "$properties"
 }
 
 function compile() {
@@ -42,7 +42,11 @@ function compile() {
     for file in "$src/"*; do
         local fileC="$dst/$(basename "$file")"
         if [ -d "$file" ]; then
-            compile "$file" "$fileC" "$properties"
+            if [ "$(basename $file)" != "node_modules" ]; then
+                compile "$file" "$fileC" "$properties"
+            else
+                cp -r "$file" "$fileC"
+            fi
         else
             verboseR "$file"
             "__ROOT__/utils/compiler" "$file" "$fileC" "$properties"

@@ -11,7 +11,7 @@ function module_load_options() {
 }
 
 function module_run() {
+	test -f "$CONFIG" || error "$CONFIG not found"
 	source "__ROOT__/utils/installers/bash"
 	install
-	wx add-to-path
 }
