@@ -11,7 +11,13 @@ function module_load_options() {
 }
 
 function module_run() {
-	test -f "$CONFIG" || error "$CONFIG not found"
-	source "__ROOT__/utils/installers/bash"
+	if [ -f "package.json" ]; then
+		source "__ROOT__/utils/installers/node"
+	elif [ -f "$CONFIG" ]; then
+		source "__ROOT__/utils/installers/bash"
+	else
+		error "No installer found for current directory"
+	fi
+	
 	install
 }

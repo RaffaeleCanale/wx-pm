@@ -1,0 +1,15 @@
+function install() {
+    npm install
+    npm run build
+
+    local name=`cat package.json | jq -r '.name'`
+    if [ "$name" == "null" ]; then
+        name=`basename "$PWD"`
+    fi
+    local main=`cat package.json | jq -r '.main'`
+    main="$PWD/$main"
+
+    local output="$WX_PATH/$name"
+    echo "node \"$main\" \"\$@\"" > "$output"
+    chmod +x "$output"
+}
