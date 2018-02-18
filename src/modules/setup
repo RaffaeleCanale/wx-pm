@@ -11,7 +11,16 @@ function module_load_options() {
 }
 
 function module_run() {
+	setupPath
     setUpBashrc
+}
+
+function setupPath() {
+	safeMkdir "$WX_PATH"
+
+	if [ ! -f "$WX_PATH/wx" ]; then
+		ln -s "__ROOT__/wx" "$WX_PATH/wx"
+	fi
 }
 
 
