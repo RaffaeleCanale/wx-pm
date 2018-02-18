@@ -7,8 +7,8 @@ export PATH="$PATH:__PATH__"
 
 ########## BASH COMPLETION ##########
 
-#if [ -d "${SCRIPTS}/completion" ]; then
-#    for comp in "${SCRIPTS}/completion/"*; do
-#        . "$comp"
-#    done
-#fi
+if [ -d "$HOME/.bash_completion.d" ]; then
+    for comp in "$HOME/.bash_completion.d/"*; do
+        . "$comp"
+    done
+fi

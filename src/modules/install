@@ -18,6 +18,30 @@ function module_run() {
 	else
 		error "No installer found for current directory"
 	fi
-	
+
 	install
+	setupBashCompletion
+}
+
+function lookupBashCompletion() {
+	local files=(bash_completion .bash_completion dist/bash_completion dist/.bash_completion)
+
+	for file in "${files[@]}"; do
+		if [ -f "$file" ]; then
+			completion_file="$PWD/$file"
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+function setupBashCompletion() {
+	name=`basename "$PWD"`
+	if [ ! -f "$HOME/.bash_completion.d/$name" ]; then
+		if lookupBashCompletion; then
+			ln -s "$completion_file" "$HOME/.bash_completion.d/$name"
+			chmod +x "$completion_file"
+		fi
+	fi
 }

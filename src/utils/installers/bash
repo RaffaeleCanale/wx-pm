@@ -15,7 +15,7 @@ function install() {
 function postInstall() {
     local cmd=`getConfig postInstall null`
     if [ "$cmd" != "null" ]; then
-        eval "$cmd"
+        (eval "$cmd")
     fi
 }
 
@@ -72,5 +72,7 @@ function add_to_path() {
 	main_file="$dist/$main"
 
 	test -f "$main_file" || error "File $main_file not found"
-	ln -s "$main_file" "$WX_PATH/$main"
+    if [ ! -f "$WX_PATH/$main" ]; then
+        ln -s "$main_file" "$WX_PATH/$main"
+    fi
 }

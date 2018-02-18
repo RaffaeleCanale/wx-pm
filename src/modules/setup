@@ -16,6 +16,7 @@ function module_run() {
 }
 
 function setupPath() {
+	safeMkdir "$HOME/.bash_completion.d"
 	safeMkdir "$WX_PATH"
 
 	if [ ! -f "$WX_PATH/wx" ]; then
