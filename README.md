@@ -1,4 +1,4 @@
-### Easily setup a bash environment with many useful scripts, auto-completion.
+### Easily setup a bash environment with many useful scripts, auto-completion and quick configuration setup.
 
 # Configuration
 
