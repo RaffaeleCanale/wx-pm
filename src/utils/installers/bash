@@ -31,7 +31,7 @@ function defaultProperties() {
 function buildProperties() {
     local content=`defaultProperties "$1"`
 
-    if [ `getConfig "files" "null"` != "null" ]; then
+    if [ "`getConfig "files" "null"`" != "null" ]; then
         files=(`getConfig 'files[].output'`)
 
         for file in "${files[@]}"; do
