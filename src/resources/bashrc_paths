@@ -2,7 +2,7 @@
 ########## PATHS ##########
 
 export SCRIPTS_ROOT="__ROOT__"
-export PATH="$PATH:__PATH__"
+export PATH="__PATH__:$PATH"
 
 
 ########## BASH COMPLETION ##########

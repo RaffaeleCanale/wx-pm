@@ -170,7 +170,7 @@ function extract() {
 
 ########## COMMAND PROMPT ##########
 _parse_git_branch() {
-     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+    /usr/bin/git rev-parse --abbrev-ref HEAD 2> /dev/null
 }
 _last_cmd_status() {
     if [ $? -eq 0 ]; then
@@ -179,7 +179,7 @@ _last_cmd_status() {
         echo -e "\033[01;31m❌\033[0m"
     fi
 }
-export PS1="\$(_last_cmd_status) \W\[\033[33m\]\$(_parse_git_branch)\[\033[00m\]\n> "
+export PS1="\$(_last_cmd_status) \W\[\033[33m\] \$(_parse_git_branch)\[\033[00m\]\n> "
 
 
 ########## OTHER ##########
