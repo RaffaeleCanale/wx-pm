@@ -1,16 +1,16 @@
 #!/bin/bash
-function module_print_help() {
+function modulePrintHelp() {
 	cat << EOF
 	Setup bashrc configuration
 
 EOF
 }
 
-function module_load_options() {
+function moduleLoadOptions() {
     return 0
 }
 
-function module_run() {
+function moduleRun() {
 	setupPath
     setupBashrc
 	setupBashCompletion

@@ -36,7 +36,7 @@ EOF
         echoGreen "$moduleName "
 
         source "$module"
-        module_print_help
+        modulePrintHelp
     done
 }
 
@@ -58,13 +58,13 @@ function run () {
     source "$module"
     shift
     ARGUMENTS=("$@")
-    module_load_options
+    moduleLoadOptions
 
     if [ $unusedBehaviour != "IGNORE" ]; then
         checkUnused
     fi
 
-    module_run "${ARGUMENTS[@]:+${ARGUMENTS[@]}}"
+    moduleRun "${ARGUMENTS[@]:+${ARGUMENTS[@]}}"
 }
 
 source "__STARTER__@v1"
