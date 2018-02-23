@@ -1,0 +1,22 @@
+__wx()
+{
+    local modes
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    modes="`ls __ROOT__/modules`"
+
+    case "$prev" in
+        "wx" )
+            COMPREPLY=( $(compgen -W "${modes}" -- ${cur}) )
+            ;;
+        # "apply" )
+        #     COMPREPLY=( $(compgen -W "$(wx list_raw)" -- ${cur}) )
+        #     ;;
+        # * )
+        #     ;;
+    esac
+}
+
+complete -F __wx wx

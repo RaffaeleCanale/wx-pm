@@ -12,7 +12,8 @@ function module_load_options() {
 
 function module_run() {
 	setupPath
-    setUpBashrc
+    setupBashrc
+	setupBashCompletion
 }
 
 function setupPath() {
@@ -25,7 +26,7 @@ function setupPath() {
 }
 
 
-function setUpBashrc() {
+function setupBashrc() {
 	local content=`cat __ROOT__/../.bashrc_template __ROOT__/resources/bashrc_paths`
 
 	# TODO Include bash_completion
@@ -39,4 +40,12 @@ function setUpBashrc() {
 	done
 
 	echo "$content" > "$HOME/.bashrc"
+}
+
+function setupBashCompletion() {
+	if [ ! -f "$HOME/.bash_completion.d/wx-pm" ]; then
+    	completion_file="__ROOT__/resources/bash_completion"
+    	ln -s "$completion_file" "$HOME/.bash_completion.d/wx-pm"
+    	chmod +x "$completion_file"
+	fi
 }
