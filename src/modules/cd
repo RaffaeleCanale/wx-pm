@@ -1,0 +1,8 @@
+#!/bin/bash
+function autocomplete() {
+    ls "$PROJECTS_DIR"
+}
+
+function moduleRun() {
+    bash --rcfile <(echo ". ~/.bashrc && cd \"${PROJECTS_DIR}/${1:-}\"")
+}

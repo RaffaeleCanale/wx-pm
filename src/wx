@@ -42,10 +42,34 @@ EOF
 
 function loadOptions() {
     unusedBehaviour="IGNORE"
-    return 0
+    getOpt "--autocomplete" autocomplete
 }
 
+function autocomplete() {
+    if [ $# -gt 1 ]; then
+        # Targets a module's autocomplete
+        local module="__ROOT__/modules/$2"
+        source "$module"
+        if type autocomplete &>/dev/null; then
+            shift
+            shift
+            autocomplete "$@"
+        fi
+    else
+        # Targets root autocomplete
+        # local modules=()
+        ls "__ROOT__/modules"
+        # echo ${modules[@]} | sed "s/\b$component\b//g";
+    fi
+}
+
+
 function run () {
+    if $autocomplete; then
+        autocomplete "$@"
+        return 0
+    fi
+
     hasMoreArgs $#
 
     local module="__ROOT__/modules/$1"
@@ -58,7 +82,9 @@ function run () {
     source "$module"
     shift
     ARGUMENTS=("$@")
-    moduleLoadOptions
+    if type moduleLoadOptions &>/dev/null; then
+        moduleLoadOptions
+    fi
 
     if [ $unusedBehaviour != "IGNORE" ]; then
         checkUnused

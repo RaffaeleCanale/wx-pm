@@ -1,21 +1,16 @@
 __wx()
 {
-    local modes
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    modes="`ls __ROOT__/modules`"
-
     case "$prev" in
         "wx" )
-            COMPREPLY=( $(compgen -W "${modes}" -- ${cur}) )
+            COMPREPLY=( $(compgen -W "`wx --autocomplete`" -- ${cur}) )
             ;;
-        # "apply" )
-        #     COMPREPLY=( $(compgen -W "$(wx list_raw)" -- ${cur}) )
-        #     ;;
-        # * )
-        #     ;;
+        * )
+            COMPREPLY=( $(compgen -W "`wx --autocomplete "${COMP_WORDS[@]}"`" -- ${cur}) )
+            ;;
     esac
 }
 
