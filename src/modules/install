@@ -39,7 +39,9 @@ function preInstall() {
 function initConfig() {
 	if [ -f "$CONFIG" ] && hasConfig "files"; then
         getConfig _files "files[].output"
-        files=("$_files")
+		changeIFS
+        files=($_files)
+		resetIFS
 
         for file in "${files[@]}"; do
 			_ensureExists "$file" || stop "Missing config file: $file"
