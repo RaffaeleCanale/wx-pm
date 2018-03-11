@@ -22,7 +22,7 @@ function sedeasy {
 #   1: File size
 #
 function printSize() {
-    awk -v sum="$1" ' BEGIN {hum[1024^3]="Gb"; hum[1024^2]="Mb"; hum[1024]="Kb"; for (x=1024^3; x>=1024; x/=1024) { if (sum>=x) { printf "%.2f %s\n",sum/x,hum[x]; break; } } if (sum<1024) print "1kb"; } '
+    awk -v sum="$1" ' BEGIN {hum[1024^3]="Gb"; hum[1024^2]="Mb"; hum[1024]="Kb"; for (x=1024^3; x>=1024; x/=1024) { if (sum>=x) { printf "%.2f %s\n",sum/x,hum[x]; break; } } if (sum<1024) print "1 kb"; } '
 }
 
 #
@@ -273,6 +273,15 @@ function getFreshFile() {
 
 function apply() {
     eval "$1=\"$2\""
+}
+
+function padLeft() {
+    eval "local _value=\"\$$1\""
+    while [ ${#_value} -lt $2 ]; do
+        _value=" $_value"
+    done
+
+    apply $1 "$_value"
 }
 
 #

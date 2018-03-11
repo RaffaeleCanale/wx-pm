@@ -7,6 +7,7 @@ function install() {
     buildProperties "$dist"
 
     info "Compiling to $dist"
+    test -d "$dist" && rm -r "$dist"/*
     compile "$src" "$dist" "$properties"
     crClear
 
