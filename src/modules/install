@@ -14,6 +14,7 @@ function moduleRun() {
 
 	loadEnv
 	preInstall
+	initConfig
 	install
 	postInstall
 	setupBashCompletion
@@ -33,6 +34,35 @@ function preInstall() {
 		info "Pre-install: $cmd"
 		(eval "$cmd")
 	fi
+}
+
+function initConfig() {
+	if [ -f "$CONFIG" ] && hasConfig "files"; then
+        getConfig _files "files[].output"
+        files=("$_files")
+
+        for file in "${files[@]}"; do
+			_ensureExists "$file" || stop "Missing config file: $file"
+        done
+    fi
+}
+
+function _ensureExists() {
+	local file="$1"
+	local exampleFile="${file}.example"
+
+	if [ -f "$file" ]; then
+		return 0
+	fi
+
+	if [ -f "$exampleFile" ]; then
+		if [[ "$file" == *.properties ]]; then
+			createProperties "$file" "$exampleFile"
+			return $?
+		fi
+	fi
+
+	return 1
 }
 
 function detectEnvironment() {
@@ -78,3 +108,5 @@ function lookupBashCompletion() {
 
 	return 1
 }
+
+source "__ROOT__/utils/config/create"

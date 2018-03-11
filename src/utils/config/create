@@ -1,0 +1,17 @@
+#!/bin/bash
+
+function createProperties() {
+    local output=""
+
+    changeIFS
+    for line in `cat "$2"`; do
+        local key=`echo "$line" | awk -F "=" '{print $1}'`
+        local message=`echo "$line" | awk -F "=" '{print $2}'`
+
+        input value "Enter the value for `cyan $key` (`grey "$message"`): "
+        output="${output}$key= $value\n"
+    done
+    resetIFS
+
+    echo -e "$output" > "$1"
+}
