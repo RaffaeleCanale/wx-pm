@@ -1,26 +1,69 @@
 #!/bin/bash
 function modulePrintHelp() {
 	cat << EOF
-	Install a project with a $CONFIG file present
-
+        Install a project with a $CONFIG file present
 EOF
 }
 
-function moduleLoadOptions() {
-    return 0
-}
-
 function moduleRun() {
-	if [ -f "package.json" ]; then
-		source "__ROOT__/utils/installers/node"
-	elif [ -f "$CONFIG" ]; then
-		source "__ROOT__/utils/installers/bash"
+	if [ -f "$CONFIG" ] && hasConfig "env"; then
+		getConfig env env
 	else
-		error "No installer found for current directory"
+		detectEnvironment
 	fi
 
+	loadEnv
+	preInstall
 	install
+	postInstall
 	setupBashCompletion
+}
+
+function postInstall() {
+	if [ -f "$CONFIG" ] && hasConfig "postInstall"; then
+		getConfig cmd postInstall
+		info "Post-install: $cmd"
+		(eval "$cmd")
+	fi
+}
+
+function preInstall() {
+	if [ -f "$CONFIG" ] && hasConfig "preInstall"; then
+		getConfig cmd preInstall
+		info "Pre-install: $cmd"
+		(eval "$cmd")
+	fi
+}
+
+function detectEnvironment() {
+	if [ -f "package.json" ]; then
+		env="node"
+	elif [ -f "$CONFIG" ]; then
+		env="bash"
+	else
+		stop "Couldn't determine env"
+	fi
+
+	verbose "Detected env: $env"
+}
+
+function loadEnv() {
+	info "Loading env: $env"
+	installer="__ROOT__/utils/installers/$env"
+	test -f "$installer" || stop "Installer not found for env: $env"
+
+	source "$installer"
+}
+
+function setupBashCompletion() {
+	name=`basename "$PWD"`
+	if [ ! -f "$HOME/.bash_completion.d/$name" ]; then
+		if lookupBashCompletion; then
+			ln -s "$completion_file" "$HOME/.bash_completion.d/$name"
+			chmod +x "$completion_file"
+			verbose "Link bash_completion: $completion_file"
+		fi
+	fi
 }
 
 function lookupBashCompletion() {
@@ -34,14 +77,4 @@ function lookupBashCompletion() {
 	done
 
 	return 1
-}
-
-function setupBashCompletion() {
-	name=`basename "$PWD"`
-	if [ ! -f "$HOME/.bash_completion.d/$name" ]; then
-		if lookupBashCompletion; then
-			ln -s "$completion_file" "$HOME/.bash_completion.d/$name"
-			chmod +x "$completion_file"
-		fi
-	fi
 }

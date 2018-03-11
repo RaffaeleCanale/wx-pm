@@ -1,7 +1,15 @@
 function install() {
+    info "npm install"
     npm install
-    npm run build
+    if hasBuildScript; then
+        info "npm run build"
+        npm run build
+    fi
 
+    addPathScript
+}
+
+function addPathScript() {
     local name=`cat package.json | jq -r '.name'`
     if [ "$name" == "null" ]; then
         name=`basename "$PWD"`
@@ -12,4 +20,10 @@ function install() {
     local output="$WX_PATH/$name"
     echo "node \"$main\" \"\$@\"" > "$output"
     chmod +x "$output"
+    info "Create start script at $output"
+}
+
+function hasBuildScript() {
+    local script=`cat package.json | jq -r '.scripts.build'`
+    [ "$script" != "null" ]
 }

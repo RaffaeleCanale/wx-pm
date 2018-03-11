@@ -1,6 +1,6 @@
 function install() {
-    local src=`getPath source src`
-    local dist=`getPath dist dist`
+    getConfigPath src src src
+    getConfigPath dist dist dist
 
     test -d "$src" || error "Source not found"
 
@@ -9,17 +9,19 @@ function install() {
 }
 
 function getConfig() {
-    local result=`cat "$CONFIG" | jq -r ".$1"`
+    test -f "$CONFIG" || stop "$CONFIG not found"
+    local result=`cat "$CONFIG" | jq -r ".$2"`
     if [ "$result" == "null" ]; then
-        echo "$2"
+        apply $1 "${3:-null}"
     else
-        echo "$result"
+        apply $1 "$result"
     fi
 }
 
-function getPath() {
-    local path=`getConfig "$1" "$2"`
-    echo "$PWD/$path"
+function getConfigPath() {
+    local _path
+    getConfig _path "$2" "$3"
+    apply $1 "$PWD/$_path"
 }
 
 function safeProp() {
@@ -49,7 +51,7 @@ function compile() {
         if [ -d "$file" ]; then
             compile "$file" "$fileC" "$properties"
         else
-            verboseR "$file"
+            crPrint "$file"
             cat "$file" | applyProperties "$properties" > "$fileC"
             chmod +x "$fileC"
         fi
@@ -99,4 +101,4 @@ function run() {
     install
 }
 
-source "./src/utils/starter/scriptStarter@v1"
+source "./src/utils/starter/scriptStarter@v2"

@@ -1,22 +1,16 @@
 function install() {
-    local src=`getConfigPath source src`
-    local dist=`getConfigPath dist dist`
+    getConfigPath src src src
+    getConfigPath dist dist dist
 
-    test -d "$src" || error "Source not found"
+    test -d "$src" || stop "Source not found"
 
     buildProperties "$dist"
-    compile "$src" "$dist" "$properties"
 
-    postInstall
+    info "Compiling to $dist"
+    compile "$src" "$dist" "$properties"
+    crClear
 
     add_to_path "$dist"
-}
-
-function postInstall() {
-    local cmd=`getConfig postInstall null`
-    if [ "$cmd" != "null" ]; then
-        (eval "$cmd")
-    fi
 }
 
 function safeProp() {
@@ -31,8 +25,9 @@ function defaultProperties() {
 function buildProperties() {
     local content=`defaultProperties "$1"`
 
-    if [ "`getConfig "files" "null"`" != "null" ]; then
-        files=(`getConfig 'files[].output'`)
+    if hasConfig "files"; then
+        getConfig _files "files[].output"
+        files=("$_files")
 
         for file in "${files[@]}"; do
             if [[ "$file" == *.properties ]]; then
@@ -62,7 +57,7 @@ function compile() {
                 cp -r "$file" "$fileC"
             fi
         else
-            verboseR "$file"
+            crPrint "$file"
             "__ROOT__/utils/compiler" "$file" "$fileC" "$properties"
         fi
     done
@@ -71,11 +66,12 @@ function compile() {
 function add_to_path() {
 	local dist="$1"
 	local project_name=`basename $PWD`
-	main=`getConfig "main" "$project_name"`
+    getConfig main main "$project_name"
 	main_file="$dist/$main"
 
-	test -f "$main_file" || error "File $main_file not found"
+	test -f "$main_file" || stop "File $main_file not found"
     if [ ! -f "$WX_PATH/$main" ]; then
         ln -s "$main_file" "$WX_PATH/$main"
+        info "Link at $WX_PATH/$main"
     fi
 }

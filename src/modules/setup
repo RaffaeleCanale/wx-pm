@@ -1,13 +1,11 @@
 #!/bin/bash
 function modulePrintHelp() {
 	cat << EOF
-	Setup bashrc configuration
-
+	Setup wx-pm, more specifically, this will
+	  - Add 'wx' to PATH
+	  - Generate a '.bashrc' file from template
+	  - Prepare the bash_completion directory
 EOF
-}
-
-function moduleLoadOptions() {
-    return 0
 }
 
 function moduleRun() {
@@ -21,12 +19,14 @@ function setupPath() {
 	safeMkdir "$WX_PATH"
 
 	if [ ! -f "$WX_PATH/wx" ]; then
+		verbose "Link 'wx' at $WX_PATH/wx"
 		ln -s "__ROOT__/wx" "$WX_PATH/wx"
 	fi
 }
 
 
 function setupBashrc() {
+	verbose "Generating bashrc"
 	local content=`cat __ROOT__/../.bashrc_template __ROOT__/resources/bashrc_paths`
 
 	# TODO Include bash_completion
@@ -35,6 +35,7 @@ function setupBashrc() {
 			if [ -f "$dir/.bashrc" ]; then
 				tmpContent=`cat "$dir/.bashrc"`
 				content="${content}${tmpContent}"
+				verbose "Include $dir/.bashrc"
 			fi
 		fi
 	done
@@ -43,9 +44,11 @@ function setupBashrc() {
 }
 
 function setupBashCompletion() {
+	verbose "Setting up bash_completion"
 	if [ ! -f "$HOME/.bash_completion.d/wx-pm" ]; then
     	completion_file="__ROOT__/resources/bash_completion"
     	ln -s "$completion_file" "$HOME/.bash_completion.d/wx-pm"
     	chmod +x "$completion_file"
+		verbose "Link completion file at $completion_file"
 	fi
 }

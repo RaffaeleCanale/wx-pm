@@ -1,4 +1,10 @@
 #!/bin/bash
+function modulePrintHelp() {
+    cat << EOF
+        Navigate to a projects directory
+EOF
+}
+
 function autocomplete() {
     ls "$PROJECTS_DIR"
 }

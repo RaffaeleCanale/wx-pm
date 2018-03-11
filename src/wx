@@ -7,33 +7,37 @@ function declareConstants() {
 }
 
 function getConfig() {
-    test -f "$CONFIG" || error "$CONFIG not found"
-    local result=`cat "$CONFIG" | jq -r ".$1"`
+    test -f "$CONFIG" || stop "$CONFIG not found"
+    local result=`cat "$CONFIG" | jq -r ".$2"`
     if [ "$result" == "null" ]; then
-        echo "$2"
+        apply $1 "${3:-null}"
     else
-        echo "$result"
+        apply $1 "$result"
     fi
 }
 
+function hasConfig() {
+    local _value
+    getConfig _value "$1" null
+    [ "$_value" != "null" ]
+}
+
 function getConfigPath() {
-    local path=`getConfig "$1" "$2"`
-    echo "$PWD/$path"
+    local _path
+    getConfig _path "$2" "$3"
+    apply $1 "$PWD/$_path"
 }
 
 function printHelp() {
     cat << EOF
 
-    TODO
+    Install and setup projects
 EOF
-
     for module in "__ROOT__/modules/"*; do
         local moduleName=$(basename "$module")
 
         echo
-        echo
-        echo -n "      ${PROGNAME} "
-        echoGreen "$moduleName "
+        echo "    ${PROGNAME} `green $moduleName`"
 
         source "$module"
         modulePrintHelp
@@ -56,10 +60,7 @@ function autocomplete() {
             autocomplete "$@"
         fi
     else
-        # Targets root autocomplete
-        # local modules=()
         ls "__ROOT__/modules"
-        # echo ${modules[@]} | sed "s/\b$component\b//g";
     fi
 }
 
@@ -75,7 +76,7 @@ function run () {
     local module="__ROOT__/modules/$1"
 
     if [ ! -f "$module" ]; then
-        error "Unknown mode: $1"
+        stop "Unknown mode: $1"
     fi
 
 
@@ -93,4 +94,4 @@ function run () {
     moduleRun "${ARGUMENTS[@]:+${ARGUMENTS[@]}}"
 }
 
-source "__STARTER__@v1"
+source "__STARTER__@v2"
