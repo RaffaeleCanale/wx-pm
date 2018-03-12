@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 function modulePrintHelp() {
     cat << EOF
         Navigate to a projects directory

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+function modulePrintHelp() {
+    cat << EOF
+        TODO
+EOF
+}
+
+function autocomplete() {
+    echo "pull"
+}
+
+function moduleLoadOptions() {
+    getOpt "--all" all
+}
+
+function moduleRun() {
+    hasMoreArgs $#
+
+    if $all; then
+        for project in "${PROJECTS_DIR[@]}/"*; do
+            cd "$project"
+            $1
+        done
+    else
+        $1
+    fi
+}
+
+function pull() {
+    name="`basename "$PWD"`"
+    if [ ! -f "$CONFIG" ]; then
+        warn "No config file found in `blue $name`"
+        return 0
+    fi
+
+    info "Pull config for `blue $name`"
+    wx-client-config
+}
