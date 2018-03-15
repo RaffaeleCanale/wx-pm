@@ -21,7 +21,7 @@ function moduleRun() {
 }
 
 function postInstall() {
-	if [ -f "$CONFIG" ] && hasConfig "postInstall"; then
+	if hasConfig "postInstall"; then
 		getConfig cmd postInstall
 		info "Post-install: $cmd"
 		(eval "$cmd")
@@ -29,7 +29,7 @@ function postInstall() {
 }
 
 function preInstall() {
-	if [ -f "$CONFIG" ] && hasConfig "preInstall"; then
+	if hasConfig "preInstall"; then
 		getConfig cmd preInstall
 		info "Pre-install: $cmd"
 		(eval "$cmd")
@@ -37,7 +37,7 @@ function preInstall() {
 }
 
 function initConfig() {
-	if [ -f "$CONFIG" ] && hasConfig "files"; then
+	if hasConfig "files"; then
         getConfig _files "files[].output"
 		changeIFS
         files=($_files)

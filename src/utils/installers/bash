@@ -2,13 +2,23 @@ function install() {
     getConfigPath src src src
     getConfigPath dist dist dist
 
-    test -d "$src" || stop "Source not found"
+    _install
+}
+
+function _install() {
+    test -e "$src" || stop "Source not found"
 
     buildProperties "$dist"
 
     info "Compiling to $dist"
     test -d "$dist" && rm -r "$dist"/*
-    compile "$src" "$dist" "$properties"
+    if [ -d "$src" ]; then
+        for file in "$src/"*; do
+            compile "$src" "$dist" "$properties"
+        done
+    else
+        compile "$src" "$dist" "$properties"
+    fi
     crClear
 
     add_to_path "$dist"
@@ -43,25 +53,23 @@ function buildProperties() {
 }
 
 function compile() {
-    local src="$1"
+    local file="$1"
     local dst="$2"
     local properties="$3"
 
     safeMkdir "$dst"
 
-    for file in "$src/"*; do
-        local fileC="$dst/$(basename "$file")"
-        if [ -d "$file" ]; then
-            if [ "$(basename $file)" != "node_modules" ]; then
-                compile "$file" "$fileC" "$properties"
-            else
-                cp -r "$file" "$fileC"
-            fi
+    local fileC="$dst/$(basename "$file")"
+    if [ -d "$file" ]; then
+        if [ "$(basename $file)" != "node_modules" ]; then
+            compile "$file" "$fileC" "$properties"
         else
-            crPrint "$file"
-            "__ROOT__/utils/compiler" "$file" "$fileC" "$properties"
+            cp -r "$file" "$fileC"
         fi
-    done
+    else
+        crPrint "$file"
+        "__ROOT__/utils/compiler" "$file" "$fileC" "$properties"
+    fi
 }
 
 function add_to_path() {

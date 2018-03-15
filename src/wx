@@ -7,12 +7,15 @@ function declareConstants() {
 }
 
 function getConfig() {
-    test -f "$CONFIG" || stop "$CONFIG not found"
-    local result=`cat "$CONFIG" | jq -r ".$2"`
-    if [ "$result" == "null" ]; then
+    if [ ! -f "$CONFIG" ]; then
         apply $1 "${3:-null}"
     else
-        apply $1 "$result"
+        local result=`cat "$CONFIG" | jq -r ".$2"`
+        if [ "$result" == "null" ]; then
+            apply $1 "${3:-null}"
+        else
+            apply $1 "$result"
+        fi
     fi
 }
 

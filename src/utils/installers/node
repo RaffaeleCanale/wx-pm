@@ -10,10 +10,39 @@ function install() {
 }
 
 function addPathScript() {
-    local name=`cat package.json | jq -r '.name'`
-    if [ "$name" == "null" ]; then
-        name=`basename "$PWD"`
+    getName
+
+    if [ -f "$CONFIG" ]; then
+        getConfig starter starter "null"
+        if [ "$starter" == "null" ]; then
+            verbose "Generating starter"
+            generateStarter
+        else
+            verbose "Using custom starter $starter"
+            initStarter
+        fi
     fi
+}
+
+function hasBuildScript() {
+    local script=`cat package.json | jq -r '.scripts.build'`
+    [ "$script" != "null" ]
+}
+
+function getName() {
+    local project_name=`cat package.json | jq -r '.name'`
+    if [ "$project_name" == "null" ]; then
+        project_name=`basename "$PWD"`
+    fi
+
+    if [ -f "$CONFIG" ]; then
+        getConfig name main "$project_name"
+    else
+        name="$project_name"
+    fi
+}
+
+function generateStarter() {
     local main=`cat package.json | jq -r '.main'`
     main="$PWD/$main"
 
@@ -23,7 +52,9 @@ function addPathScript() {
     info "Create start script at $output"
 }
 
-function hasBuildScript() {
-    local script=`cat package.json | jq -r '.scripts.build'`
-    [ "$script" != "null" ]
+function initStarter() {
+    source "__ROOT__/utils/installers/bash"
+    src="$starter"
+    getConfigPath dist dist dist
+    _install
 }
