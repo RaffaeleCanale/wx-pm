@@ -11,10 +11,10 @@ function _install() {
     buildProperties "$dist"
 
     info "Compiling to $dist"
-    test -d "$dist" && rm -r "$dist"/*
+    test -d "$dist" && rm -r "$dist"
     if [ -d "$src" ]; then
         for file in "$src/"*; do
-            compile "$src" "$dist" "$properties"
+            compile "$file" "$dist" "$properties"
         done
     else
         compile "$src" "$dist" "$properties"
@@ -62,7 +62,9 @@ function compile() {
     local fileC="$dst/$(basename "$file")"
     if [ -d "$file" ]; then
         if [ "$(basename $file)" != "node_modules" ]; then
-            compile "$file" "$fileC" "$properties"
+            for f in "$file/"*; do
+                compile "$f" "$fileC" "$properties"
+            done
         else
             cp -r "$file" "$fileC"
         fi
