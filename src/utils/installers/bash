@@ -36,8 +36,8 @@ function defaultProperties() {
 function buildProperties() {
     local content=`defaultProperties "$1"`
 
-    if hasConfig "files"; then
-        getConfig _files "files[].output"
+    if hasConfig "config"; then
+        getConfig _files "config[]"
         files=("$_files")
 
         for file in "${files[@]}"; do

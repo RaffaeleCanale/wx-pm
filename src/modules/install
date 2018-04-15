@@ -37,8 +37,8 @@ function preInstall() {
 }
 
 function initConfig() {
-	if hasConfig "files"; then
-        getConfig _files "files[].output"
+	if hasConfig "config"; then
+        getConfig _files "config[]"
 		changeIFS
         files=($_files)
 		resetIFS
