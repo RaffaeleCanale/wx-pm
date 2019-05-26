@@ -1,8 +1,9 @@
 
 ########## PATHS ##########
 
+export GOPATH="$HOME/Others/Installations/Go"
 export SCRIPTS_ROOT="__ROOT__"
-export PATH="__PATH__:$PATH"
+export PATH="__PATH__:$PATH:$(go env GOPATH)/bin"
 
 
 ########## BASH COMPLETION ##########

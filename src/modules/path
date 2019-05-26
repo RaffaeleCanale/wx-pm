@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+function modulePrintHelp() {
+    cat << EOF
+        Prints the projects directory
+EOF
+}
+
+function autocomplete() {
+    return
+}
+
+function moduleRun() {
+    echo "$STACK_DIR"
+}
