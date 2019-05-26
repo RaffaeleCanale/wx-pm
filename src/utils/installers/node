@@ -1,9 +1,9 @@
 function install() {
-    info "npm install"
-    npm install
+    info "yarn install"
+    yarn install
     if hasBuildScript; then
-        info "npm run build"
-        npm run build
+        info "yarn run build"
+        yarn run build
     fi
 
     addPathScript
