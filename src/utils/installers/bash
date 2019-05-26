@@ -9,6 +9,8 @@ function _install() {
     test -e "$src" || stop "Source not found"
 
     buildProperties "$dist"
+    verbose "Properties:"
+    verbose "$(cat "$properties")"
 
     info "Compiling to $dist"
     test -d "$dist" && rm -r "$dist"
@@ -46,6 +48,8 @@ function buildProperties() {
                 content="${content}\n${contentCat}"
             fi
         done
+    else
+        verbose "No properties config found"
     fi
 
     createTmpFile properties

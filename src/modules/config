@@ -18,7 +18,7 @@ function moduleRun() {
     hasMoreArgs $#
 
     if $all; then
-        for project in "${PROJECTS_DIR[@]}/"*; do
+        for project in `getProjectsAbsolutePath`; do
             cd "$project"
             $1
         done

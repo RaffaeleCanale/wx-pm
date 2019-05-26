@@ -1,42 +1,42 @@
-#!/usr/bin/env bash
-function lazyclone {
-    url="$1"
-    reponame=$(echo "$url" | awk -F/ '{print $NF}' | sed -e 's/.git$//')
-    git clone "$url" "$reponame" || stop "Failed to clone"
-    cd "$reponame"
-}
+# #!/usr/bin/env bash
+# function lazyclone {
+#     url="$1"
+#     reponame=$(echo "$url" | awk -F/ '{print $NF}' | sed -e 's/.git$//')
+#     git clone "$url" "$reponame" || stop "Failed to clone"
+#     cd "$reponame"
+# }
 
-function modulePrintHelp() {
-    cat << EOF
-        Clone and install a project
-EOF
-}
+# function modulePrintHelp() {
+#     cat << EOF
+#         Clone and install a project
+# EOF
+# }
 
-function moduleLoadOptions() {
-    getOpt "--config-ln" config -1
+# function moduleLoadOptions() {
+#     getOpt "--config-ln" config -1
 
-    if [ "${#config[@]}" -gt 0 ]; then
-        absConfig=()
-        for config in "${config[@]}"; do
-            file=`realpath "$config"`
-            test -f "$file" || stop "File not found: $file"
-            absConfig+=("$file")
-        done
-    fi
-}
+#     if [ "${#config[@]}" -gt 0 ]; then
+#         absConfig=()
+#         for config in "${config[@]}"; do
+#             file=`realpath "$config"`
+#             test -f "$file" || stop "File not found: $file"
+#             absConfig+=("$file")
+#         done
+#     fi
+# }
 
-function moduleRun() {
-    getArg repo "$@"
+# function moduleRun() {
+#     getArg repo "$@"
 
-    cd "$PROJECTS_DIR"
-    lazyclone "$repo"
-    copyConfig
+#     cd "$PROJECTS_DIR"
+#     lazyclone "$repo"
+#     copyConfig
 
-    wx install
-}
+#     wx install
+# }
 
-function copyConfig() {
-    for config in "${absConfig[@]}"; do
-        ln -s "$config" "`basename "$config"`"
-    done
-}
+# function copyConfig() {
+#     for config in "${absConfig[@]}"; do
+#         ln -s "$config" "`basename "$config"`"
+#     done
+# }

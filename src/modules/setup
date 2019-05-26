@@ -19,23 +19,22 @@ function setupPath() {
 	safeMkdir "$WX_PATH"
 
 	if [ ! -f "$WX_PATH/wx" ]; then
-		verbose "Link 'wx' at $WX_PATH/wx"
+		info "Link 'wx' at $WX_PATH/wx"
 		ln -s "__ROOT__/wx" "$WX_PATH/wx"
 	fi
 }
 
 
 function setupBashrc() {
-	verbose "Generating bashrc"
+	info "Generating bashrc"
 	local content=`cat __ROOT__/../.bashrc_template __ROOT__/resources/bashrc_paths`
 
-	# TODO Include bash_completion
-	for dir in "$PROJECTS_DIR/"*; do
+	for dir in `getProjectsAbsolutePath`; do
 		if [ -d "$dir" ] && [ "$dir" != "$PWD" ]; then
 			if [ -f "$dir/.bashrc" ]; then
 				tmpContent=`cat "$dir/.bashrc"`
 				content="${content}${tmpContent}"
-				verbose "Include $dir/.bashrc"
+				info "    Including  `basename $dir`/.bashrc"
 			fi
 		fi
 	done
@@ -44,11 +43,12 @@ function setupBashrc() {
 }
 
 function setupBashCompletion() {
-	verbose "Setting up bash_completion"
+	info "Setting up bash_completion"
+
 	if [ ! -f "$HOME/.bash_completion.d/wx-pm" ]; then
     	completion_file="__ROOT__/resources/bash_completion"
     	ln -s "$completion_file" "$HOME/.bash_completion.d/wx-pm"
     	chmod +x "$completion_file"
-		verbose "Link completion file at $completion_file"
+		info "    Link completion file at $completion_file"
 	fi
 }
