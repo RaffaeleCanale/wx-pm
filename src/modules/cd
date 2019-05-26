@@ -11,5 +11,5 @@ function autocomplete() {
 }
 
 function moduleRun() {
-    bash --rcfile <(echo ". ~/.bashrc && cd \"${STACK_DIR}/${1:-}\"")
+    bash --rcfile <(echo ". ~/.bashrc && cd \"${PROJECTS_DIR}/${1:-}\"")
 }

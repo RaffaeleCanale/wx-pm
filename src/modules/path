@@ -11,5 +11,5 @@ function autocomplete() {
 }
 
 function moduleRun() {
-    echo "$STACK_DIR"
+    echo "$PROJECTS_DIR"
 }

@@ -3,7 +3,7 @@
 # Configuration
 
 1. Setup you `config.properties` file with both these properties:
-  - `__STACK_DIR__`: Directory of the wx-stack project
+  - `__PROJECTS_DIR__`: Directory of the wx-stack project
   - `__PATH__`: Directory that will be added to `$PATH`
 
 2. Copy your favourite `.bashrc` configuration to `.bashrc_template`

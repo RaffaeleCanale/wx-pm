@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function declareConstants() {
-    $1 STACK_DIR "__STACK_DIR__"
+    $1 PROJECTS_DIR "__PROJECTS_DIR__"
     $1 WX_PATH "__PATH__"
     $1 CONFIG ".wxrc"
 }
@@ -68,11 +68,13 @@ function autocomplete() {
 }
 
 function getProjects() {
-    cat "$STACK_DIR/.gitmodules" | grep path | cut -c 9-
+    pushd "$PROJECTS_DIR" > /dev/null
+    find * -maxdepth 3 -execdir test -e {}/.git \; -printf "%p " -prune
+    popd > /dev/null
 }
 
 function getProjectsAbsolutePath() {
-    getProjects | awk '$0="'$STACK_DIR'"$0'
+    find "$PROJECTS_DIR/"* -maxdepth 3 -execdir test -e {}/.git \; -printf "%p " -prune
 }
 
 
