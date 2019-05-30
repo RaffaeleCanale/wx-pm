@@ -43,6 +43,13 @@ function buildProperties() {
         files=("$_files")
 
         for file in "${files[@]}"; do
+            if [[ "$file" == '{'* ]]; then
+				local tmp=`echo "$file" | jq -r .output`
+				if [ "$tmp" == "null" ]; then
+					tmp=`echo "$file" | jq -r .file`
+				fi
+				file="$tmp"
+			fi
             if [[ "$file" == *.properties ]]; then
                 contentCat=`cat "$file"`
                 content="${content}\n${contentCat}"

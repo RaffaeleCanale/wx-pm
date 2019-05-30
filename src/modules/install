@@ -44,6 +44,13 @@ function initConfig() {
 		resetIFS
 
         for file in "${files[@]}"; do
+			if [[ "$file" == '{'* ]]; then
+				local tmp=`echo "$file" | jq -r .output`
+				if [ "$tmp" == "null" ]; then
+					tmp=`echo "$file" | jq -r .file`
+				fi
+				file="$tmp"
+			fi
 			_ensureExists "$file" || stop "Missing config file: $file"
         done
     fi
