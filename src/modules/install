@@ -6,6 +6,10 @@ EOF
 }
 
 function moduleRun() {
+	if [ -f "./install.sh" ]; then
+		./install.sh
+		return
+	fi
 	if [ -f "$CONFIG" ] && hasConfig "env"; then
 		getConfig env env
 	else
