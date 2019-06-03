@@ -31,15 +31,28 @@ function setupBashrc() {
 
 	for dir in `getProjectsAbsolutePath`; do
 		if [ -d "$dir" ] && [ "$dir" != "$PWD" ]; then
-			if [ -f "$dir/.bashrc" ]; then
-				tmpContent=`cat "$dir/.bashrc"`
+			findBashrc bashrc "$dir"
+			if [ "$bashrc" != "null" ]; then
+				tmpContent=`cat "$bashrc"`
 				content="${content}${tmpContent}"
-				info "    Including  `basename $dir`/.bashrc"
+				info "    Including $bashrc"
 			fi
 		fi
 	done
 
 	echo "$content" > "$HOME/.bashrc"
+}
+
+function findBashrc() {
+	paths=("dist/.bashrc" "dist/bashrc" ".bashrc" "bashrc")
+	for p in "${paths[@]}"; do
+		file="$2/$p"
+		if [ -f "$file" ]; then
+			apply $1 "$file"
+			return
+		fi
+	done
+	apply $1 "null"
 }
 
 function setupBashCompletion() {
