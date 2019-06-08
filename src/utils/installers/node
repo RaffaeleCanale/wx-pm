@@ -15,12 +15,15 @@ function addPathScript() {
     if [ -f "$CONFIG" ]; then
         getConfig starter starter "null"
         if [ "$starter" == "null" ]; then
-            verbose "Generating starter"
+            info "Generating starter"
             generateStarter
         else
-            verbose "Using custom starter $starter"
+            info "Using custom starter $starter"
             initStarter
         fi
+    else
+        info "Generating starter"
+        generateStarter
     fi
 }
 
