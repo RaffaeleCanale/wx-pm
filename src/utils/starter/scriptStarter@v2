@@ -444,21 +444,21 @@ function getOpt() {
             if [ $# -lt 3 ] || [ "$3" == "0" ]; then
                 eval "${ro}$2=true"
             elif [ "$3" == "OPT" ]; then
-                eval "${ro}$2=${ARGUMENTS[$i]}"
+                eval "${ro}$2='${ARGUMENTS[$i]}'"
 
             elif [ "$3" == "1" ]; then
                 i=$((i+1))
 
                 hasMoreArgs "${#ARGUMENTS[@]}" "$((i-1))" "Missing arguments for $1"
 
-                eval "${ro}$2=${ARGUMENTS[$i]}"
+                eval "${ro}$2='${ARGUMENTS[$i]}'"
 
             elif [ "$3" == "-1" ]; then
                 eval "$2=()"
 
                 i=$((i+1))
                 while [ $i -lt "${#ARGUMENTS[@]}" ]; do
-                    eval "$2+=(${ARGUMENTS[$i]})"
+                    eval "$2+=('${ARGUMENTS[$i]}')"
                     i=$((i+1))
                 done
 
@@ -470,7 +470,7 @@ function getOpt() {
                     i=$((i+1))
 
                     hasMoreArgs "${#ARGUMENTS[@]}" "$((i-1))" "Missing arguments for $1"
-                    eval "$2+=(${ARGUMENTS[$i]})"
+                    eval "$2+=('${ARGUMENTS[$i]}')"
 
                     j=$((j-1))
                 done
