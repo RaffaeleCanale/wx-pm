@@ -98,6 +98,10 @@ function loadOptions() {
     return 0
 }
 function run() {
+    if ! [ -x "$(command -v jq)" ]; then
+        error "Please install jq"
+    fi
+
     install
 }
 
