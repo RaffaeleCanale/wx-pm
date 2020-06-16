@@ -642,4 +642,5 @@ if [ $unusedBehaviour != "IGNORE" ]; then
     checkUnused
 fi
 
+ORIGINAL_ARGS=$@
 run "${ARGUMENTS[@]:+${ARGUMENTS[@]}}"

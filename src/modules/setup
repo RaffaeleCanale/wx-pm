@@ -30,7 +30,7 @@ function setupBashrc() {
 	local content=`cat __ROOT__/../.bashrc_template __ROOT__/resources/bashrc_paths`
 
 	for dir in `getProjectsAbsolutePath`; do
-		if [ -d "$dir" ] && [ "$dir" != "$PWD" ]; then
+		if [ -d "$dir" ]; then
 			findBashrc bashrc "$dir"
 			if [ "$bashrc" != "null" ]; then
 				tmpContent=`cat "$bashrc"`
