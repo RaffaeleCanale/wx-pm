@@ -27,8 +27,7 @@ function setupPath() {
 
 function setupBashrc() {
 	info "Generating bashrc"
-	local content=`cat __ROOT__/../.bashrc_template __ROOT__/resources/bashrc_paths`
-
+	local content=`cat __ROOT__/../.bashrc_template __ROOT__/../.bashrc_ps1 __ROOT__/resources/bashrc_paths`
 	for dir in `getProjectsAbsolutePath`; do
 		if [ -d "$dir" ]; then
 			findBashrc bashrc "$dir"
