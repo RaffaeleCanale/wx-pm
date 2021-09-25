@@ -72,7 +72,7 @@ __powerline() {
 
     __git_info() {
         # no .git directory
-    	[ -d .git ] || return
+    	[ -e .git ] || return
 
         local aheadN
         local behindN
@@ -94,33 +94,64 @@ __powerline() {
         # print the git branch segment without a trailing newline
         # branch is modified?
         if [ -n "$(git status --porcelain)" ]; then
-            printf "%s" "${BG_COLOR8}$RESET$BG_COLOR8 $branch$marks $(__jira) $FG_COLOR9"
+            printf "%s" "$branch$marks $(__jira) *"
         else
-            printf "%s" "${BG_BLUE}$RESET$BG_BLUE $branch$marks $(__jira) $RESET$FG_BLUE"
+            printf "%s" "$branch$marks $(__jira)"
         fi
     }
 
+    cyan() {
+        echo "\e[24;48;5;24m$1\e[0m"
+    }
+
+    _last_cmd_status() {
+            if [ $? -eq 0 ]; then
+                echo -e "✔"
+            else
+                echo -e "❌"
+            fi
+        }
+
     ps1() {
-        # Check the exit code of the previous command and display different
-        # colors in the prompt accordingly.
-        if [ "$?" -eq 0 ]; then
-            local BG_EXIT="$BG_GREEN"
-            local FG_EXIT="$FG_GREEN"
+        # # Check the exit code of the previous command and display different
+        # # colors in the prompt accordingly.
+        # if [ "$?" -eq 0 ]; then
+        #     local BG_EXIT="$BG_GREEN"
+        #     local FG_EXIT="$FG_GREEN"
+        # else
+        #     local BG_EXIT="$BG_RED"
+        #     local FG_EXIT="$FG_RED"
+        # fi
+        # PS1="$FG_COLOR1"
+        # PS1+="$BG_COLOR5 \\W "
+        # PS1+="$RESET${FG_COLOR6}"
+        # PS1+="$(__git_info)"
+        # # PS1+=" $FG_CYAN$(__jira)${RESET}"
+        # PS1+="${BG_VIOLET}${RESET}${BG_VIOLET} "
+        # PS1+="$VPN "
+        # PS1+="${BG_EXIT}${FG_VIOLET}${RESET}"
+        # PS1+="$BG_EXIT$FG_BASE3 ${PS_SYMBOL} ${RESET}${FG_EXIT}${RESET}"
+
+        PS1=""
+        PS1+="$(_last_cmd_status)"
+
+        git_info="`__git_info`"
+        if [ -n "$git_info" ]; then
+            PS1+="`cyan " ${git_info} "`"
+            PS1+="\n\W> "
         else
-            local BG_EXIT="$BG_RED"
-            local FG_EXIT="$FG_RED"
+            PS1+="\W> "
         fi
 
-        PS1="$FG_COLOR1"
-        PS1+="$BG_COLOR5 \\W "
-        PS1+="$RESET${FG_COLOR6}"
-        PS1+="$(__git_info)"
-        # PS1+=" $FG_CYAN$(__jira)${RESET}"
-        PS1+="${BG_VIOLET}${RESET}${BG_VIOLET} "
-        PS1+="$VPN "
-        PS1+="${BG_EXIT}${FG_VIOLET}${RESET}"
-        PS1+="$BG_EXIT$FG_BASE3 ${PS_SYMBOL} ${RESET}${FG_EXIT}${RESET}"
-        PS1+="\n> "
+
+        # _parse_git_branch() {
+        #     /usr/bin/git rev-parse --abbrev-ref HEAD 2> /dev/null
+        # }
+        # _jira() {
+        #     git note 2> /dev/null
+        # }
+
+        # export PS1="\$(_last_cmd_status) \W\[\033[33m\] \$(_parse_git_branch)\[\033[00m\] \033[01;32m\$(_jira)\033[0m\n> "
     }
 
     PROMPT_COMMAND=ps1
