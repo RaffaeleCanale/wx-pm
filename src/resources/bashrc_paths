@@ -1,8 +1,9 @@
 
 ########## PATHS ##########
 
+# /home/canale/.nvm/versions/node/v16.10.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:
 export SCRIPTS_ROOT="__ROOT__"
-export PATH="__PATH__:$PATH:$(yarn global bin)"
+export PATH="__PATH__:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:$(yarn global bin)"
 
 
 ########## BASH COMPLETION ##########

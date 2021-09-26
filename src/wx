@@ -69,7 +69,7 @@ function autocomplete() {
 
 function getProjects() {
     pushd "$PROJECTS_DIR" > /dev/null
-    find * -maxdepth 3 -execdir test -e {}/.git \; -printf "%p " -prune
+    find * -maxdepth 1 -printf "%p "
     popd > /dev/null
 }
 
